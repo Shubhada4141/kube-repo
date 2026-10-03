@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'shubhadashingane/task-project-new'
+        DOCKER_IMAGE = 'shubhadashingane/new-practice-task'
     }
 
     stages {
