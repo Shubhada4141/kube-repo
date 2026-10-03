@@ -28,7 +28,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest .'
+                sh 'docker build -t $DOCKER_IMAGE:01 .'
             }
         }
 
@@ -43,37 +43,23 @@ pipeline {
                 ]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push $DOCKER_IMAGE:latest
+                        docker push $DOCKER_IMAGE:01
+                        docker logout
                     '''
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub',
-                        usernameVariable: 'DOCKER_USERNAME',
-                        passwordVariable: 'DOCKER_PASSWORD'
-                    )
-                ]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                    kubectl apply -f k8s/configmap.yaml
+                    kubectl apply -f k8s/secret.yaml
 
-                        docker pull $DOCKER_IMAGE:latest
-
-                        docker stop task-project || true
-                        docker rm task-project || true
-
-                        docker run -d \
-                            -p 8081:8081 \
-                            --name task-project \
-                            $DOCKER_IMAGE:latest
-
-                        docker logout
-                    '''
-                }
+                    kubectl rollout status deployment/task-app
+                '''
             }
         }
     }
