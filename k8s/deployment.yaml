@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: task-app
-          image: shubhadashingane/new-practice-task:latest
+          image: shubhadashingane/new-practice-task:01
           ports:
             - containerPort: 8081
