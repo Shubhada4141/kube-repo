@@ -1,3 +1,4 @@
+
 pipeline {
 
     agent any
@@ -53,10 +54,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                    export KUBECONFIG=/var/lib/jenkins/.kube/config
+
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
                     kubectl apply -f k8s/configmap.yaml
-                   
 
                     kubectl rollout status deployment/task-app
                 '''
